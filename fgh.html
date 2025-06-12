@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ระบบรายงานพิกัดความปลอดภัย</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h2>รายงานพิกัด</h2>
+  <form id="reportForm">
+    <label>ชื่อ-นามสกุล:</label>
+    <input type="text" id="name" readonly><br><br>
+
+    <label>หน่วยงาน:</label>
+    <input type="text" id="department" value="หน่วยปฐมพยาบาล 1"><br><br>
+
+    <label>พิกัด:</label>
+    <input type="text" id="location" readonly><br><br>
+
+    <label>เวลา:</label>
+    <input type="text" id="timestamp" readonly><br><br>
+
+    <button type="button" onclick="submitForm()">ส่งข้อมูล</button>
+  </form>
+
+  <script>
+    // เริ่มต้น LIFF SDK
+    async function main() {
+      await liff.init({ liffId: "2007559817-9Qol6MzR" });  // ใส่ LIFF ID ของหวานตรงนี้
+
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      } else {
+        const profile = await liff.getProfile();
+        document.getElementById("name").value = profile.displayName;
+
+        // ดึงเวลาอัตโนมัติ
+        const now = new Date();
+        document.getElementById("timestamp").value = now.toLocaleString();
+
+        // ดึง GPS อัตโนมัติ
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            document.getElementById("location").value =
+              position.coords.latitude + ", " + position.coords.longitude;
+          }, function(error) {
+            alert("ไม่สามารถดึงพิกัดได้: " + error.message);
+          });
+        } else {
+          alert("เบราว์เซอร์ไม่รองรับ GPS");
+        }
+      }
+    }
+
+    main();
+
+    function submitForm() {
+      const data = {
+        name: document.getElementById("name").value,
+        department: document.getElementById("department").value,
+        location: document.getElementById("location").value,
+        timestamp: document.getElementById("timestamp").value
+      };
+
+      console.log("ข้อมูลที่ส่ง:", data);
+      alert("ส่งข้อมูลสำเร็จ!");
+
+      // (ต่อยอด: ส่งข้อมูลนี้ไป Google Sheet หรือ Firebase ตามระบบจริง)
+    }
+  </script>
+</body>
+</html>
